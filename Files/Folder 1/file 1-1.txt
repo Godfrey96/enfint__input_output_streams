@@ -1,7 +1,0 @@
-Lorem ipsum dolor sit amet, consectetur adiposcing elif.
-Suspendisse id enim euismod erat elementum cursus.
-
-*require 'Folder 1/Folder 2/File 2-1'*
-
-In hac habitasse piatea dictumst. Etiam vitae tortor ipsum.
-Morbi massa augue, Lacinia sed nil id, congue eleifend lorem.
