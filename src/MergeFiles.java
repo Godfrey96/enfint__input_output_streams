@@ -30,12 +30,7 @@ public class MergeFiles {
                     pw.println(readLine);
                     readLine = br.readLine();
                 }
-
-                try {
-                    br.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                br.close();
             }
             pw.close();
             pw.flush();
