@@ -1,40 +1,80 @@
 import java.io.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class MergeFiles {
 
-    private String pathRoot;
-    private String outputFile;
+    static List<File> files = new ArrayList<>();
+    static Map<File, String> dependentFiles = new HashMap<>();
+    static Map<File, String> content = new HashMap<>();
 
-    public MergeFiles(String pathRoot, String outputFile) {
-        this.pathRoot = pathRoot;
-        this.outputFile = outputFile;
+    public MergeFiles() {}
+
+    // a method to list all files in a directory and subdirectories
+    public static void listOfFiles(File dirPath){
+        File filesList[] = dirPath.listFiles();
+        for(File file : filesList) {
+            if(file.isFile()) {
+                files.add(file);
+//                System.out.println(file.getName());
+            } else {
+                listOfFiles(file);
+            }
+        }
     }
 
-    public void findFilesAndConcatenate() throws IOException {
-        File dir = new File(pathRoot);
-        File fileOutputFileDir = new File(dir, outputFile);
-        PrintWriter pw = new PrintWriter(new FileWriter(fileOutputFileDir));
-        String[] files = dir.list();
+    // a method to read all the files found in a directory and subdirectories
+    public static void readFiles() throws IOException {
+        for (File file : files){
+            FileReader readFile = new FileReader(file);
+            BufferedReader br = new BufferedReader(readFile);
+            String lineReader;
+            String fileName;
+            StringBuilder fileContent = new StringBuilder();
 
-        for (int i = 0; i < files.length; i++) {
-
-            File f = new File(dir, files[i]);
-
-            if (f.isDirectory()) {
-                findFilesAndConcatenate();
-            } else {
-                BufferedReader br = new BufferedReader(new FileReader(f));
-                String readLine = br.readLine();
-
-                while (readLine != null) {
-                    pw.println(readLine);
-                    readLine = br.readLine();
+            while ((lineReader = br.readLine()) != null){
+                if (lineReader.charAt(0) == '*'){
+                   fileName = String.valueOf(geRequiredFileName(lineReader));
+                   dependentFiles.put(file, fileName);
+                }else {
+                    fileContent.append(lineReader).append("\n");
                 }
-                br.close();
             }
-            pw.close();
-            pw.flush();
+            content.put(file, fileContent.toString());
         }
+    }
+
+    // a method to write the content of all the files to an output file
+    public static void writeOutputFile(String pathOutFile) throws IOException {
+        FileWriter fw = new FileWriter(pathOutFile);
+        PrintWriter pw = new PrintWriter(fw);
+        File fileName;
+
+        for (File file : files){
+            if (dependentFiles.containsKey(file)){
+                fileName = geRequiredFileName(dependentFiles.get(file));
+                pw.println(content.get(fileName));
+                pw.println(content.get(file));
+            }else{
+                pw.println(content.get(file));
+            }
+        }
+        pw.println("\n");
+        pw.close();
+    }
+
+    // a method to get a required file name
+    private static File geRequiredFileName(String fileName) {
+        File requiredFile = null;
+        for (File file : files){
+            if (file.getName().equals(fileName)){
+                requiredFile = file;
+                break;
+            }
+        }
+        return requiredFile;
     }
 
 }
